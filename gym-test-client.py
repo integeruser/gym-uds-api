@@ -20,8 +20,10 @@ def send_action(action):
 
 
 if __name__ == '__main__':
+    socket_filepath = '/tmp/gym-server-socket'
+
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    sock.connect('/tmp/gym-server-socket')
+    sock.connect(socket_filepath)
 
     observation, _, _ = recv_state()
 

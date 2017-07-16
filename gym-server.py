@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import socket
 
 import gym
@@ -35,9 +36,13 @@ def send_state(observation, reward, done):
 
 
 if __name__ == '__main__':
+    socket_filepath = '/tmp/gym-server-socket'
+
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    sock.bind('/tmp/gym-server-socket')
+    sock.bind(socket_filepath)
     sock.listen(0)
 
     conn, _ = sock.accept()
     run(sock, conn)
+
+    os.remove(socket_filepath)

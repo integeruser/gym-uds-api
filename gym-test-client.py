@@ -8,6 +8,8 @@ class Environment:
     def __init__(self, socket_filepath):
         self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.socket.connect(socket_filepath)
+        self.action_space = lambda: None
+        self.action_space.sample = self.sample
 
     def _recv_message(self, cls):
         message_pb_len = int.from_bytes(self.socket.recv(1), byteorder='little')
@@ -32,6 +34,11 @@ class Environment:
         state = self._recv_message(gym_pb2.State)
         return state.observation, state.reward, state.done
 
+    def sample(self):
+        self._send_message(gym_pb2.Request(type=gym_pb2.Request.SAMPLE))
+        action = self._recv_message(gym_pb2.Action)
+        return action.value
+
 
 if __name__ == '__main__':
     env = Environment('/tmp/gym-server-socket')
@@ -42,6 +49,6 @@ if __name__ == '__main__':
 
         done = False
         while not done:
-            action = 1
+            action = env.action_space.sample()
             observation, reward, done = env.step(action)
             print(observation, reward, done)

@@ -1,6 +1,16 @@
 syntax = "proto3";
 
 
+message Request {
+  enum Type {
+    DONE   = 0;
+    RESET  = 1;
+    STEP   = 2;
+    SAMPLE = 3;
+  }
+  Type type = 4;
+}
+
 message Action {
   int32 value = 1;
 }
@@ -9,14 +19,4 @@ message State {
   repeated float observation = 1;
   float reward = 2;
   bool done = 3;
-}
-
-message Request {
-  enum Type {
-    DONE  = 0;
-    RESET = 1;
-    STEP  = 2;
-    STATE = 3;
-  }
-  Type type = 3;
 }

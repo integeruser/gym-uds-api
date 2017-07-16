@@ -30,6 +30,7 @@ class Environment:
             if request.type == gym_pb2.Request.DONE: break
             elif request.type == gym_pb2.Request.RESET: self.reset()
             elif request.type == gym_pb2.Request.STEP: self.step()
+            elif request.type == gym_pb2.Request.SAMPLE: self.sample()
 
     def reset(self):
         observation = self.env.reset()
@@ -40,6 +41,10 @@ class Environment:
         observation, reward, done, _ = self.env.step(action.value)
         self._send_message(gym_pb2.State(observation=observation, reward=reward, done=done))
 
+    def sample(self):
+        action = self.env.action_space.sample()
+        self._send_message(gym_pb2.Action(value=action))
+
 
 if __name__ == '__main__':
     socket_filepath = '/tmp/gym-server-socket'
@@ -47,7 +52,6 @@ if __name__ == '__main__':
         os.remove(socket_filepath)
     except FileNotFoundError:
         pass
-
     socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     socket.bind(socket_filepath)
     socket.listen()
@@ -60,4 +64,7 @@ if __name__ == '__main__':
         except BrokenPipeError:
             pass
         finally:
-            del env
+            try:
+                del env
+            except NameError:
+                pass

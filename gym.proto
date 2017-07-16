@@ -1,11 +1,22 @@
 syntax = "proto3";
 
+
 message Action {
   int32 value = 1;
 }
 
 message State {
-  repeated float value = 1;
+  repeated float observation = 1;
   float reward = 2;
   bool done = 3;
+}
+
+message Request {
+  enum Type {
+    DONE  = 0;
+    RESET = 1;
+    STEP  = 2;
+    STATE = 3;
+  }
+  Type type = 3;
 }

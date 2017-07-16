@@ -19,10 +19,40 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='gym.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\tgym.proto\"\x17\n\x06\x41\x63tion\x12\r\n\x05value\x18\x01 \x01(\x05\"4\n\x05State\x12\r\n\x05value\x18\x01 \x03(\x02\x12\x0e\n\x06reward\x18\x02 \x01(\x02\x12\x0c\n\x04\x64one\x18\x03 \x01(\x08\x62\x06proto3')
+  serialized_pb=_b('\n\tgym.proto\"\x17\n\x06\x41\x63tion\x12\r\n\x05value\x18\x01 \x01(\x05\":\n\x05State\x12\x13\n\x0bobservation\x18\x01 \x03(\x02\x12\x0e\n\x06reward\x18\x02 \x01(\x02\x12\x0c\n\x04\x64one\x18\x03 \x01(\x08\"X\n\x07Request\x12\x1b\n\x04type\x18\x03 \x01(\x0e\x32\r.Request.Type\"0\n\x04Type\x12\x08\n\x04\x44ONE\x10\x00\x12\t\n\x05RESET\x10\x01\x12\x08\n\x04STEP\x10\x02\x12\t\n\x05STATE\x10\x03\x62\x06proto3')
 )
 
 
+
+_REQUEST_TYPE = _descriptor.EnumDescriptor(
+  name='Type',
+  full_name='Request.Type',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='DONE', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='RESET', index=1, number=1,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='STEP', index=2, number=2,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='STATE', index=3, number=3,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=138,
+  serialized_end=186,
+)
+_sym_db.RegisterEnumDescriptor(_REQUEST_TYPE)
 
 
 _ACTION = _descriptor.Descriptor(
@@ -64,7 +94,7 @@ _STATE = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='value', full_name='State.value', index=0,
+      name='observation', full_name='State.observation', index=0,
       number=1, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -97,11 +127,46 @@ _STATE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=38,
-  serialized_end=90,
+  serialized_end=96,
 )
 
+
+_REQUEST = _descriptor.Descriptor(
+  name='Request',
+  full_name='Request',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='type', full_name='Request.type', index=0,
+      number=3, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _REQUEST_TYPE,
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=98,
+  serialized_end=186,
+)
+
+_REQUEST.fields_by_name['type'].enum_type = _REQUEST_TYPE
+_REQUEST_TYPE.containing_type = _REQUEST
 DESCRIPTOR.message_types_by_name['Action'] = _ACTION
 DESCRIPTOR.message_types_by_name['State'] = _STATE
+DESCRIPTOR.message_types_by_name['Request'] = _REQUEST
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Action = _reflection.GeneratedProtocolMessageType('Action', (_message.Message,), dict(
@@ -117,6 +182,13 @@ State = _reflection.GeneratedProtocolMessageType('State', (_message.Message,), d
   # @@protoc_insertion_point(class_scope:State)
   ))
 _sym_db.RegisterMessage(State)
+
+Request = _reflection.GeneratedProtocolMessageType('Request', (_message.Message,), dict(
+  DESCRIPTOR = _REQUEST,
+  __module__ = 'gym_pb2'
+  # @@protoc_insertion_point(class_scope:Request)
+  ))
+_sym_db.RegisterMessage(Request)
 
 
 # @@protoc_insertion_point(module_scope)

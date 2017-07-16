@@ -4,28 +4,44 @@ import socket
 import gym_pb2
 
 
-def recv_state():
-    state_pb = sock.recv(int.from_bytes(sock.recv(1), byteorder='little'))
-    state = gym_pb2.State()
-    state.ParseFromString(state_pb)
-    return state.value, state.reward, state.done
+class Environment:
+    def __init__(self, socket_filepath):
+        self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self.socket.connect(socket_filepath)
 
+    def _recv_message(self, cls):
+        message_pb_len = int.from_bytes(self.socket.recv(1), byteorder='little')
+        message_pb = self.socket.recv(message_pb_len)
+        message = cls()
+        message.ParseFromString(message_pb)
+        return message
 
-def send_action(action):
-    action_pb = gym_pb2.Action(value=action).SerializeToString()
-    sock.sendall(len(action_pb).to_bytes(1, byteorder='little') + action_pb)
+    def _send_message(self, message):
+        message_pb = message.SerializeToString()
+        self.socket.sendall(len(message_pb).to_bytes(1, byteorder='little'))
+        self.socket.sendall(message_pb)
+
+    def reset(self):
+        self._send_message(gym_pb2.Request(type=gym_pb2.Request.RESET))
+        state = self._recv_message(gym_pb2.State)
+        return state.observation, state.reward, state.done
+
+    def step(self, action):
+        self._send_message(gym_pb2.Request(type=gym_pb2.Request.STEP))
+        self._send_message(gym_pb2.Action(value=action))
+        state = self._recv_message(gym_pb2.State)
+        return state.observation, state.reward, state.done
 
 
 if __name__ == '__main__':
-    socket_filepath = '/tmp/gym-server-socket'
+    env = Environment('/tmp/gym-server-socket')
 
-    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    sock.connect(socket_filepath)
+    num_episodes = 3
+    for episode in range(num_episodes):
+        observation, _, _ = env.reset()
 
-    observation, _, _ = recv_state()
-
-    done = False
-    while not done:
-        send_action(0)
-        observation, reward, done = recv_state()
-        print(observation, reward, done)
+        done = False
+        while not done:
+            action = 1
+            observation, reward, done = env.step(action)
+            print(observation, reward, done)

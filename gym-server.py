@@ -7,16 +7,38 @@ import gym
 import gym_pb2
 
 
-def recv_action():
-    action_pb = conn.recv(int.from_bytes(conn.recv(1), byteorder='little'))
-    action = gym_pb2.Action()
-    action.ParseFromString(action_pb)
-    return action.value
+class Environment:
+    def __init__(self, conn):
+        self.env = gym.make('CartPole-v0')
+        self.conn = conn
 
+    def _recv_message(self, cls):
+        message_pb_len = int.from_bytes(self.conn.recv(1), byteorder='little')
+        message_pb = self.conn.recv(message_pb_len)
+        message = cls()
+        message.ParseFromString(message_pb)
+        return message
 
-def send_state(observation, reward, done):
-    state_pb = gym_pb2.State(value=observation, reward=reward, done=done).SerializeToString()
-    conn.sendall(len(state_pb).to_bytes(1, byteorder='little') + state_pb)
+    def _send_message(self, message):
+        message_pb = message.SerializeToString()
+        self.conn.sendall(len(message_pb).to_bytes(1, byteorder='little'))
+        self.conn.sendall(message_pb)
+
+    def run(self):
+        while True:
+            request = self._recv_message(gym_pb2.Request)
+            if request.type == gym_pb2.Request.DONE: break
+            elif request.type == gym_pb2.Request.RESET: self.reset()
+            elif request.type == gym_pb2.Request.STEP: self.step()
+
+    def reset(self):
+        observation = self.env.reset()
+        self._send_message(gym_pb2.State(observation=observation, reward=0.0, done=False))
+
+    def step(self):
+        action = self._recv_message(gym_pb2.Action)
+        observation, reward, done, _ = self.env.step(action.value)
+        self._send_message(gym_pb2.State(observation=observation, reward=reward, done=done))
 
 
 if __name__ == '__main__':
@@ -26,18 +48,16 @@ if __name__ == '__main__':
     except FileNotFoundError:
         pass
 
-    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    sock.bind(socket_filepath)
-    sock.listen()
+    socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    socket.bind(socket_filepath)
+    socket.listen()
 
-    env = gym.make('CartPole-v0')
     while True:
-        conn, _ = sock.accept()
-        observation = env.reset()
-        send_state(observation, 0.0, False)
-
-        done = False
-        while not done:
-            action = recv_action()
-            observation, reward, done, _ = env.step(action)
-            send_state(observation, float(reward), bool(done))
+        try:
+            conn, _ = socket.accept()
+            env = Environment(conn)
+            env.run()
+        except BrokenPipeError:
+            pass
+        finally:
+            del env

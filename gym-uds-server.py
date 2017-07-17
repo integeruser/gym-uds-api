@@ -5,7 +5,7 @@ import socket
 
 import gym
 
-import gym_pb2
+import gym_uds_pb2
 
 
 class Environment:
@@ -27,24 +27,24 @@ class Environment:
 
     def run(self):
         while True:
-            request = self._recv_message(gym_pb2.Request)
-            if request.type == gym_pb2.Request.DONE: break
-            elif request.type == gym_pb2.Request.RESET: self.reset()
-            elif request.type == gym_pb2.Request.STEP: self.step()
-            elif request.type == gym_pb2.Request.SAMPLE: self.sample()
+            request = self._recv_message(gym_uds_pb2.Request)
+            if request.type == gym_uds_pb2.Request.DONE: break
+            elif request.type == gym_uds_pb2.Request.RESET: self.reset()
+            elif request.type == gym_uds_pb2.Request.STEP: self.step()
+            elif request.type == gym_uds_pb2.Request.SAMPLE: self.sample()
 
     def reset(self):
         observation = self.env.reset()
-        self._send_message(gym_pb2.State(observation=observation, reward=0.0, done=False))
+        self._send_message(gym_uds_pb2.State(observation=observation, reward=0.0, done=False))
 
     def step(self):
-        action = self._recv_message(gym_pb2.Action)
+        action = self._recv_message(gym_uds_pb2.Action)
         observation, reward, done, _ = self.env.step(action.value)
-        self._send_message(gym_pb2.State(observation=observation, reward=reward, done=done))
+        self._send_message(gym_uds_pb2.State(observation=observation, reward=reward, done=done))
 
     def sample(self):
         action = self.env.action_space.sample()
-        self._send_message(gym_pb2.Action(value=action))
+        self._send_message(gym_uds_pb2.Action(value=action))
 
 
 if __name__ == '__main__':

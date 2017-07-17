@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "gym.h"
-#include "gym.pb.h"
+#include "gym-uds.pb.h"
 
 
 int main(int argc, char const *argv[])

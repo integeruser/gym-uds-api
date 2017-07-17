@@ -10,7 +10,7 @@
 
 #include "gym.h"
 
-#include "gym.pb.h"
+#include "gym-uds.pb.h"
 
 
 namespace gym

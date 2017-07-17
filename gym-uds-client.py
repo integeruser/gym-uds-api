@@ -2,7 +2,7 @@
 import argparse
 import socket
 
-import gym_pb2
+import gym_uds_pb2
 
 
 class Environment:
@@ -25,19 +25,19 @@ class Environment:
         self.socket.sendall(message_pb)
 
     def reset(self):
-        self._send_message(gym_pb2.Request(type=gym_pb2.Request.RESET))
-        state = self._recv_message(gym_pb2.State)
+        self._send_message(gym_uds_pb2.Request(type=gym_uds_pb2.Request.RESET))
+        state = self._recv_message(gym_uds_pb2.State)
         return state.observation
 
     def step(self, action):
-        self._send_message(gym_pb2.Request(type=gym_pb2.Request.STEP))
-        self._send_message(gym_pb2.Action(value=action))
-        state = self._recv_message(gym_pb2.State)
+        self._send_message(gym_uds_pb2.Request(type=gym_uds_pb2.Request.STEP))
+        self._send_message(gym_uds_pb2.Action(value=action))
+        state = self._recv_message(gym_uds_pb2.State)
         return state.observation, state.reward, state.done
 
     def sample(self):
-        self._send_message(gym_pb2.Request(type=gym_pb2.Request.SAMPLE))
-        action = self._recv_message(gym_pb2.Action)
+        self._send_message(gym_uds_pb2.Request(type=gym_uds_pb2.Request.SAMPLE))
+        action = self._recv_message(gym_uds_pb2.Action)
         return action.value
 
 

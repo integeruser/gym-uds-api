@@ -6,8 +6,8 @@ else
 fi
 
 if [[ ! -z $PROTOC ]] ; then
-    $PROTOC --python_out=. gym.proto &&
-    $PROTOC --cpp_out=binding-cpp gym.proto &&
-    mv binding-cpp/gym.pb.h binding-cpp/include/gym.pb.h &&
-    mv binding-cpp/gym.pb.cc binding-cpp/src/gym.pb.cc
+    $PROTOC --python_out=. gym-uds.proto &&
+    $PROTOC --cpp_out=. gym-uds.proto
+    mv gym-uds.pb.h binding-cpp/include/ &&
+    mv gym-uds.pb.cc binding-cpp/src
 fi

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-protoc --python_out={server,client-python} gym.proto
-protoc --cpp_out=client-cc gym.proto
-mv client-cc/gym.pb.h client-cc/include/gym.pb.h
-mv client-cc/gym.pb.cc client-cc/src/gym.pb.cc
+protoc --python_out=. gym.proto
+protoc --cpp_out=binding-cpp gym.proto
+mv binding-cpp/gym.pb.h binding-cpp/include/gym.pb.h
+mv binding-cpp/gym.pb.cc binding-cpp/src/gym.pb.cc

@@ -41,14 +41,16 @@ class Environment:
 
 
 if __name__ == '__main__':
-    env = Environment('/tmp/gym-server-socket')
+    env = Environment('/tmp/gym-socket')
 
     num_episodes = 3
-    for episode in range(num_episodes):
+    for episode in range(1, num_episodes + 1):
         observation = env.reset()
 
+        episode_reward = 0
         done = False
         while not done:
             action = env.action_space.sample()
             observation, reward, done = env.step(action)
-            print(observation, reward, done)
+            episode_reward += reward
+        print('Ep. %d: %.2f' % (episode, episode_reward))

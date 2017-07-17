@@ -47,7 +47,7 @@ class Environment:
 
 
 if __name__ == '__main__':
-    socket_filepath = '/tmp/gym-server-socket'
+    socket_filepath = '/tmp/gym-socket'
     try:
         os.remove(socket_filepath)
     except FileNotFoundError:

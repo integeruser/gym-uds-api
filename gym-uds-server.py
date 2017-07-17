@@ -9,21 +9,21 @@ import gym_pb2
 
 
 class Environment:
-    def __init__(self, conn):
+    def __init__(self, socket):
         self.env = gym.make('CartPole-v0')
-        self.conn = conn
+        self.socket = socket
 
     def _recv_message(self, cls):
-        message_pb_len = int.from_bytes(self.conn.recv(1), byteorder='little')
-        message_pb = self.conn.recv(message_pb_len)
+        message_pb_len = int.from_bytes(self.socket.recv(1), byteorder='little')
+        message_pb = self.socket.recv(message_pb_len)
         message = cls()
         message.ParseFromString(message_pb)
         return message
 
     def _send_message(self, message):
         message_pb = message.SerializeToString()
-        self.conn.sendall(len(message_pb).to_bytes(1, byteorder='little'))
-        self.conn.sendall(message_pb)
+        self.socket.sendall(len(message_pb).to_bytes(1, byteorder='little'))
+        self.socket.sendall(message_pb)
 
     def run(self):
         while True:

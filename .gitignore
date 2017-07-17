@@ -1,0 +1,6 @@
+__pycache__/
+server/gym_pb2.py
+client-python/gym_pb2.py
+client-cc/include/gym.pb.h
+client-cc/src/gym.pb.cc
+client-cc/bin/

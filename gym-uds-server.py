@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import os
 import socket
 
@@ -47,13 +48,21 @@ class Environment:
 
 
 if __name__ == '__main__':
-    socket_filepath = '/tmp/gym-socket'
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'filepath',
+        nargs='?',
+        default='/tmp/gym-uds-socket',
+        help='a unique filepath where the socket will bind')
+    args = parser.parse_args()
+
     try:
-        os.remove(socket_filepath)
+        os.remove(args.filepath)
     except FileNotFoundError:
         pass
+
     socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    socket.bind(socket_filepath)
+    socket.bind(args.filepath)
     socket.listen()
 
     while True:

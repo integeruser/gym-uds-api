@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import socket
 
 import gym_pb2
@@ -41,7 +42,15 @@ class Environment:
 
 
 if __name__ == '__main__':
-    env = Environment('/tmp/gym-socket')
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'filepath',
+        nargs='?',
+        default='/tmp/gym-uds-socket',
+        help='a unique filepath where the socket will connect')
+    args = parser.parse_args()
+
+    env = Environment(args.filepath)
 
     num_episodes = 3
     for episode in range(1, num_episodes + 1):

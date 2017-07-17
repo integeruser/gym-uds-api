@@ -8,7 +8,7 @@ int main(int argc, char const *argv[])
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-    auto env = gym::Environment("/tmp/gym-socket");
+    auto env = gym::Environment("/tmp/gym-uds-socket");
 
     const int num_episodes = 3;
     for (int episode = 1; episode <= num_episodes; ++episode) {

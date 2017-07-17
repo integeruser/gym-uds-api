@@ -26,7 +26,7 @@ class Environment:
     def reset(self):
         self._send_message(gym_pb2.Request(type=gym_pb2.Request.RESET))
         state = self._recv_message(gym_pb2.State)
-        return state.observation, state.reward, state.done
+        return state.observation
 
     def step(self, action):
         self._send_message(gym_pb2.Request(type=gym_pb2.Request.STEP))
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     num_episodes = 3
     for episode in range(num_episodes):
-        observation, _, _ = env.reset()
+        observation = env.reset()
 
         done = False
         while not done:

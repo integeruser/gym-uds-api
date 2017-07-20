@@ -1,15 +1,14 @@
-#include <iostream>
 #include <algorithm>
-#include <string>
-#include <vector>
 #include <cstdlib>
 #include <cstdio>
+#include <iostream>
+#include <string>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
+#include <vector>
 
 #include "gym.h"
-
 #include "gym-uds.pb.h"
 
 
@@ -19,9 +18,8 @@ template<typename T>
 T Environment::recv_message()
 {
     char buf[1024];
-    int nread;
 
-    nread = read(sock, buf, 1);
+    auto nread = read(sock, buf, 1);
     const auto message_pb_len = buf[0];
 
     nread = read(sock, buf, message_pb_len);
@@ -44,9 +42,8 @@ void Environment::send_message(const T& message)
         std::exit(1);
     }
 
-    int nwrite;
     const char message_pb_len = message_pb.size();
-    nwrite = write(sock, &message_pb_len, 1);
+    auto nwrite = write(sock, &message_pb_len, 1);
     nwrite = write(sock, message_pb.c_str(), message_pb.size());
 }
 
@@ -60,7 +57,7 @@ Environment::Environment(const std::string& socket_filepath)
 
     sock = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sock < 0) { std::perror("gym::Environment::socket"); std::exit(1); }
-    conn = connect(sock, (const struct sockaddr *)&server_addr, sizeof server_addr);
+    const auto conn = connect(sock, (const struct sockaddr *)&server_addr, sizeof server_addr);
     if (conn < 0) { std::perror("gym::Environment::connect"); std::exit(1); }
 }
 
@@ -72,8 +69,8 @@ observation_t Environment::reset()
     send_message<Request>(request);
 
     State state = recv_message<State>();
-    auto observation = std::vector<float>();
-    std::copy_n(state.observation().begin(), state.observation().size(), std::back_inserter(observation));
+    observation_t observation;
+    std::copy_n(state.observation().cbegin(), state.observation().size(), std::back_inserter(observation));
     return observation;
 }
 
@@ -88,8 +85,8 @@ state_t Environment::step(const action_t& action_value)
     send_message<Action>(action);
 
     State state = recv_message<State>();
-    auto observation = std::vector<float>();
-    std::copy_n(state.observation().begin(), state.observation().size(), std::back_inserter(observation));
+    observation_t observation;
+    std::copy_n(state.observation().cbegin(), state.observation().size(), std::back_inserter(observation));
     return {observation, state.reward(), state.done()};
 }
 

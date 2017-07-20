@@ -8,17 +8,14 @@
 namespace gym
 {
 using action_t = int;
-
 using observation_t = std::vector<float>;
-using reward_t = float;
-using done_t = bool;
-using state_t = std::tuple<observation_t, reward_t, done_t>;
+using state_t = std::tuple<observation_t, float, bool>;
 
 
 class Environment
 {
     private:
-        int sock, conn;
+        int sock;
 
         template<typename T>
         T recv_message();

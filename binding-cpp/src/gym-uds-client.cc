@@ -17,7 +17,7 @@ int main(int argc, char const *argv[])
         float reward, episode_reward = 0.0f;
         bool done = false;
         while (!done) {
-            gym::action_t action = env.sample(); // TODO
+            gym::action_t action = env.sample();
             std::tie(observation, reward, done) = env.step(action);
             episode_reward += reward;
         }

@@ -9,8 +9,8 @@ import gym_uds_pb2
 
 
 class Environment:
-    def __init__(self, socket):
-        self.env = gym.make('CartPole-v0')
+    def __init__(self, env_id, socket):
+        self.env = gym.make(env_id)
         self.socket = socket
 
     def _recv_message(self, cls):
@@ -49,6 +49,7 @@ class Environment:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('id', help='the id of the gym environment to simulate')
     parser.add_argument(
         'filepath',
         nargs='?',
@@ -68,7 +69,7 @@ if __name__ == '__main__':
     while True:
         try:
             conn, _ = socket.accept()
-            env = Environment(conn)
+            env = Environment(args.id, conn)
             env.run()
         except BrokenPipeError:
             pass

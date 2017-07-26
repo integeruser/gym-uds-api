@@ -4,11 +4,11 @@ This project provides a local [Unix domain socket](https://en.wikipedia.org/wiki
 Currently, the API only provides the methods `reset()` and `step()` for modifying the Gym environment and `sample()` for sampling from the action space, but it is simple to extend it with any other method needed.
 
 ## Requisites
-This projects requires any recent version of Google's [Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler.
+This projects requires any recent version of Google's [Protocol Buffers](https://developers.google.com/protocol-buffers/).
 
 ## Installation
 1. Clone or download this repository, e.g. `git clone https://github.com/integeruser/gym-uds-api.git`
-2. Run `./build.sh` to generate the necessary protobuf headers and sources (optionally, specifying as a command line argument the path of the `protoc` to use)
+2. Run `./build.sh` to generate the necessary protobuf headers and sources
 
 ## Usage
 1. Start the server:

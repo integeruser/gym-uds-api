@@ -11,12 +11,19 @@ message Request {
   Type type = 4;
 }
 
-message Action {
-  int32 value = 1;
+
+message Observation {
+  repeated float data = 1;
+  repeated int32 shape = 2;
 }
 
 message State {
-  repeated float observation = 1;
+  Observation observation = 1;
   float reward = 2;
   bool done = 3;
+}
+
+
+message Action {
+  int32 value = 1;
 }

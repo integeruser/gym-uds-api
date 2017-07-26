@@ -2,7 +2,10 @@
 import argparse
 import socket
 
+import numpy as np
+
 import gym_uds_pb2
+import utils
 
 
 class Environment:
@@ -12,33 +15,26 @@ class Environment:
         self.action_space = lambda: None
         self.action_space.sample = self.sample
 
-    def _recv_message(self, cls):
-        message_pb_len = int.from_bytes(self.socket.recv(1), byteorder='little')
-        message_pb = self.socket.recv(message_pb_len)
-        message = cls()
-        message.ParseFromString(message_pb)
-        return message
-
-    def _send_message(self, message):
-        message_pb = message.SerializeToString()
-        self.socket.sendall(len(message_pb).to_bytes(1, byteorder='little'))
-        self.socket.sendall(message_pb)
-
     def reset(self):
-        self._send_message(gym_uds_pb2.Request(type=gym_uds_pb2.Request.RESET))
-        state = self._recv_message(gym_uds_pb2.State)
-        return state.observation
+        utils.send_message(self.socket, gym_uds_pb2.Request(type=gym_uds_pb2.Request.RESET))
+        state_pb = utils.recv_message(self.socket, gym_uds_pb2.State)
+        observation = np.asarray(state_pb.observation.data).reshape(state_pb.observation.shape)
+        return observation
 
     def step(self, action):
-        self._send_message(gym_uds_pb2.Request(type=gym_uds_pb2.Request.STEP))
-        self._send_message(gym_uds_pb2.Action(value=action))
-        state = self._recv_message(gym_uds_pb2.State)
-        return state.observation, state.reward, state.done
+        utils.send_message(self.socket, gym_uds_pb2.Request(type=gym_uds_pb2.Request.STEP))
+        utils.send_message(self.socket, gym_uds_pb2.Action(value=action))
+        state_pb = utils.recv_message(self.socket, gym_uds_pb2.State)
+        observation = np.asarray(state_pb.observation.data).reshape(state_pb.observation.shape)
+        return observation, state_pb.reward, state_pb.done
 
     def sample(self):
-        self._send_message(gym_uds_pb2.Request(type=gym_uds_pb2.Request.SAMPLE))
-        action = self._recv_message(gym_uds_pb2.Action)
-        return action.value
+        utils.send_message(self.socket, gym_uds_pb2.Request(type=gym_uds_pb2.Request.SAMPLE))
+        action_pb = utils.recv_message(self.socket, gym_uds_pb2.Action)
+        return action_pb.value
+
+    def done(self):
+        utils.send_message(self.socket, gym_uds_pb2.Request(type=gym_uds_pb2.Request.DONE))
 
 
 if __name__ == '__main__':

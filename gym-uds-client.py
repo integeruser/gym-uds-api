@@ -9,32 +9,32 @@ import utils
 
 
 class Environment:
-    def __init__(self, socket_filepath):
-        self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        self.socket.connect(socket_filepath)
+    def __init__(self, sock_filepath):
+        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self.sock.connect(sock_filepath)
         self.action_space = lambda: None
         self.action_space.sample = self.sample
 
     def reset(self):
-        utils.send_message(self.socket, gym_uds_pb2.Request(type=gym_uds_pb2.Request.RESET))
-        state_pb = utils.recv_message(self.socket, gym_uds_pb2.State)
+        utils.send_message(self.sock, gym_uds_pb2.Request(type=gym_uds_pb2.Request.RESET))
+        state_pb = utils.recv_message(self.sock, gym_uds_pb2.State)
         observation = np.asarray(state_pb.observation.data).reshape(state_pb.observation.shape)
         return observation
 
     def step(self, action):
-        utils.send_message(self.socket, gym_uds_pb2.Request(type=gym_uds_pb2.Request.STEP))
-        utils.send_message(self.socket, gym_uds_pb2.Action(value=action))
-        state_pb = utils.recv_message(self.socket, gym_uds_pb2.State)
+        utils.send_message(self.sock, gym_uds_pb2.Request(type=gym_uds_pb2.Request.STEP))
+        utils.send_message(self.sock, gym_uds_pb2.Action(value=action))
+        state_pb = utils.recv_message(self.sock, gym_uds_pb2.State)
         observation = np.asarray(state_pb.observation.data).reshape(state_pb.observation.shape)
         return observation, state_pb.reward, state_pb.done
 
     def sample(self):
-        utils.send_message(self.socket, gym_uds_pb2.Request(type=gym_uds_pb2.Request.SAMPLE))
-        action_pb = utils.recv_message(self.socket, gym_uds_pb2.Action)
+        utils.send_message(self.sock, gym_uds_pb2.Request(type=gym_uds_pb2.Request.SAMPLE))
+        action_pb = utils.recv_message(self.sock, gym_uds_pb2.Action)
         return action_pb.value
 
     def done(self):
-        utils.send_message(self.socket, gym_uds_pb2.Request(type=gym_uds_pb2.Request.DONE))
+        utils.send_message(self.sock, gym_uds_pb2.Request(type=gym_uds_pb2.Request.DONE))
 
 
 if __name__ == '__main__':

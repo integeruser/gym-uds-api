@@ -1,13 +1,13 @@
 # gym-uds-api
-This project provides a local [Unix domain socket](https://en.wikipedia.org/wiki/Unix_domain_socket) API to the [OpenAI Gym](https://github.com/openai/gym) toolkit, allowing development in languages other than Python with a much faster interprocess communication than the [gym-http-api](https://github.com/openai/gym-http-api).
+This project provides a local [Unix domain socket](https://en.wikipedia.org/wiki/Unix_domain_socket) API to the [OpenAI Gym](https://github.com/openai/gym) toolkit, allowing development in languages other than Python with a faster interprocess communication than the [gym-http-api](https://github.com/openai/gym-http-api).
 
-Currently, the API supports only observation spaces of type `Box` and action spaces of type `Discrete`, but it is straightforward to extend it to suit other needs.
+The API comes with a C++ binding example which supports one-dimensional observation spaces of type `Box` and action spaces of type `Discrete`.
 
 ## Requisites
-This projects requires any recent version of Google's [Protocol Buffers](https://developers.google.com/protocol-buffers/).
+The code requires the `gym` package for Python 3 and any recent version of Google's [Protocol Buffers](https://developers.google.com/protocol-buffers/).
 
 ## Installation
-1. Clone or download this repository, e.g. `git clone https://github.com/integeruser/gym-uds-api.git`
+1. Clone or download this repository
 2. Run `./build.sh` to generate the necessary protobuf headers and sources
 
 ## Usage

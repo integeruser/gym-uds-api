@@ -11,7 +11,7 @@ def recv_exactly(socket, n):
 
 
 def recv_message(socket, cls):
-    message_len = int.from_bytes(recv_exactly(socket, 3), byteorder='little')
+    message_len = int.from_bytes(recv_exactly(socket, 4), byteorder='little')
     message_bytes = recv_exactly(socket, message_len)
     message = cls()
     message.ParseFromString(message_bytes)
@@ -20,6 +20,6 @@ def recv_message(socket, cls):
 
 def send_message(socket, message):
     message_bytes = message.SerializeToString()
-    message_len = len(message_bytes).to_bytes(3, byteorder='little')
+    message_len = len(message_bytes).to_bytes(4, byteorder='little')
     socket.sendall(message_len)
     socket.sendall(message_bytes)

@@ -19,8 +19,8 @@ T Environment::recv_message()
 {
     char buf[1024];
 
-    auto nread = read(sock, buf, 1);
-    const auto message_pb_len = buf[0];
+    auto nread = read(sock, buf, 4);
+    const int message_pb_len = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
 
     nread = read(sock, buf, message_pb_len);
     std::string message_pb(buf, nread);
@@ -42,8 +42,8 @@ void Environment::send_message(const T& message)
         std::exit(1);
     }
 
-    const char message_pb_len = message_pb.size();
-    auto nwrite = write(sock, &message_pb_len, 1);
+    const int message_pb_len = message_pb.size();
+    auto nwrite = write(sock, (char *)&message_pb_len, 4);
     nwrite = write(sock, message_pb.c_str(), message_pb.size());
 }
 
@@ -70,7 +70,7 @@ observation_t Environment::reset()
 
     State state = recv_message<State>();
     observation_t observation;
-    std::copy_n(state.observation().cbegin(), state.observation().size(), std::back_inserter(observation));
+    std::copy_n(state.observation().data().cbegin(), state.observation().data().size(), std::back_inserter(observation));
     return observation;
 }
 
@@ -86,7 +86,7 @@ state_t Environment::step(const action_t& action_value)
 
     State state = recv_message<State>();
     observation_t observation;
-    std::copy_n(state.observation().cbegin(), state.observation().size(), std::back_inserter(observation));
+    std::copy_n(state.observation().data().cbegin(), state.observation().data().size(), std::back_inserter(observation));
     return {observation, state.reward(), state.done()};
 }
 

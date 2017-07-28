@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 cd $(dirname $(realpath $0))
 
-PROTOC=$(which protoc)
+if [[ ! -z $1 ]] ; then
+    PROTOC=$1
+else
+    PROTOC=$(which protoc)
+fi
+
 if [[ ! -z $PROTOC ]] ; then
     $PROTOC --python_out=. gym-uds.proto &&
     $PROTOC --cpp_out=. gym-uds.proto &&

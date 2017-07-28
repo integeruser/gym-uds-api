@@ -12,8 +12,6 @@
 #include "gym-uds.pb.h"
 
 
-namespace gym
-{
 template<typename T>
 T Environment::recv_message()
 {
@@ -99,5 +97,4 @@ action_t Environment::sample()
 
     Action action = recv_message<Action>();
     return action.value();
-}
 }

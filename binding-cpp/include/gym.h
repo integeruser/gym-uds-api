@@ -5,8 +5,6 @@
 #include <tuple>
 #include <vector>
 
-namespace gym
-{
 using action_t = int;
 using observation_t = std::vector<float>;
 using state_t = std::tuple<observation_t, float, bool>;
@@ -31,6 +29,6 @@ class Environment
 
         action_t sample();
 };
-}
+
 
 #endif

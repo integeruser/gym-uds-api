@@ -8,16 +8,16 @@ int main(int argc, char const *argv[])
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-    auto env = gym::Environment("/tmp/gym-uds-socket");
+    auto env = Environment("/tmp/gym-uds-socket");
 
     const int num_episodes = 3;
     for (int episode = 1; episode <= num_episodes; ++episode) {
-        gym::observation_t observation = env.reset();
+        observation_t observation = env.reset();
 
         float reward, episode_reward = 0.0f;
         bool done = false;
         while (!done) {
-            gym::action_t action = env.sample();
+            action_t action = env.sample();
             std::tie(observation, reward, done) = env.step(action);
             episode_reward += reward;
         }

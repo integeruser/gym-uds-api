@@ -15,26 +15,27 @@ The code requires the `gym` package for Python 3 and any recent version of Googl
 ```
 /o/gym-uds-api $ python3 ./gym-uds-server.py CartPole-v0
 ```
-2. Run the Python or C++ client:
+2. Run the (useless, for testing only) Python client or the C++ binding:
 ```
-/o/gym-uds-api $ python3 ./gym-uds-client.py
-Ep. 1: 53.00
+/o/gym-uds-api $ ./gym-uds-test-client.py
+Ep. 1: 15.00
 Ep. 2: 12.00
-Ep. 3: 39.00
-/o/gym-uds-api $ python3 ./gym-uds-client.py
-Ep. 1: 31.00
-Ep. 2: 16.00
-Ep. 3: 10.00
+Ep. 3: 20.00
+/o/gym-uds-api $ ./gym-uds-test-client.py
+Ep. 1: 14.00
+Ep. 2: 14.00
+Ep. 3: 16.00
 ```
 ```
 /o/g/binding-cpp $ make
-c++ -std=c++11 -O2 -o gym-uds-client -I include -l protobuf src/*.cc
-/o/g/binding-cpp $ ./gym-uds-client
-Ep. 1: 17
-Ep. 2: 16
-Ep. 3: 15
-/o/g/binding-cpp $ ./gym-uds-client
-Ep. 1: 16
-Ep. 2: 12
-Ep. 3: 13
+mkdir -p bin
+c++ -std=c++11 -O2 -o bin/gym-uds-client -I include -l protobuf src/*.cc
+/o/g/binding-cpp $ bin/gym-uds-client
+Ep. 1: 19
+Ep. 2: 13
+Ep. 3: 10
+/o/g/binding-cpp $ bin/gym-uds-client
+Ep. 1: 12
+Ep. 2: 21
+Ep. 3: 21
 ```

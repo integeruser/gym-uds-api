@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <vector>
 
-#include "gym.h"
+#include "gym-uds.h"
 #include "gym-uds.pb.h"
 
 

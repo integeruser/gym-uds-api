@@ -1,5 +1,6 @@
 __pycache__/
-gym_uds_pb2.py
+bin/
 binding-cpp/include/gym-uds.pb.h
 binding-cpp/src/gym-uds.pb.cc
 binding-cpp/gym-uds-client
+gym_uds_pb2.py

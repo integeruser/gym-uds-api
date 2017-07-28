@@ -46,12 +46,12 @@ void Environment::send_message(const T& message)
 }
 
 
-Environment::Environment(const std::string& socket_filepath)
+Environment::Environment(const std::string& sock_filepath)
 {
     struct sockaddr_un server_addr = {};
     server_addr.sun_len = sizeof server_addr;
     server_addr.sun_family = AF_UNIX;
-    std::strncpy(server_addr.sun_path, socket_filepath.c_str(), sizeof server_addr.sun_path);
+    std::strncpy(server_addr.sun_path, sock_filepath.c_str(), sizeof server_addr.sun_path);
 
     sock = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sock < 0) { std::perror("gym::Environment::socket"); std::exit(1); }

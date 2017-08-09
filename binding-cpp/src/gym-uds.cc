@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <sys/socket.h>
@@ -51,13 +52,21 @@ void Environment::send_message(const T& message)
 Environment::Environment(const std::string& sock_filepath)
 {
     struct sockaddr_un server_addr = {};
+    #ifdef __APPLE__
     server_addr.sun_len = sizeof server_addr;
+    #endif
     server_addr.sun_family = AF_UNIX;
     std::strncpy(server_addr.sun_path, sock_filepath.c_str(), sizeof server_addr.sun_path);
 
     sock = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sock < 0) { std::perror("gym::Environment::socket"); std::exit(1); }
-    const auto conn = connect(sock, (const struct sockaddr *)&server_addr, sizeof server_addr);
+
+    #ifdef __APPLE__
+    const auto addr_len = SUN_LEN(&server_addr);
+    #else
+    const auto addr_len = std::strlen(server_addr.sun_path) + sizeof server_addr.sun_family;
+    #endif
+    const auto conn = connect(sock, (struct sockaddr *)&server_addr, addr_len);
     if (conn < 0) { std::perror("gym::Environment::connect"); std::exit(1); }
 }
 

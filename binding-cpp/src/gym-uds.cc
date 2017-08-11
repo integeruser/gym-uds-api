@@ -15,6 +15,16 @@
 
 namespace gym_uds
 {
+void recv_exactly(int socket, unsigned int n, char *buf)
+{
+    auto remaining = n;
+    while (remaining > 0) {
+        const auto nread = read(socket, buf + (n-remaining), remaining);
+        if (nread < 1 ) { std::perror("recv_exactly"); std::exit(1); }
+        remaining -= nread;
+    }
+}
+
 template<typename T>
 T Environment::recv_message()
 {
@@ -23,8 +33,9 @@ T Environment::recv_message()
     auto nread = read(sock, buf, 4);
     const int message_pb_len = (buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0];
 
-    nread = read(sock, buf, message_pb_len);
-    std::string message_pb(buf, nread);
+    std::vector<char> buf2(message_pb_len);
+    recv_exactly(sock, message_pb_len, buf2.data());
+    std::string message_pb(buf2.data(), message_pb_len);
 
     T message;
     if (!message.ParseFromString(message_pb)) {
@@ -52,20 +63,20 @@ void Environment::send_message(const T& message)
 Environment::Environment(const std::string& sock_filepath)
 {
     struct sockaddr_un server_addr = {};
-    #ifdef __APPLE__
+#ifdef __APPLE__
     server_addr.sun_len = sizeof server_addr;
-    #endif
+#endif
     server_addr.sun_family = AF_UNIX;
     std::strncpy(server_addr.sun_path, sock_filepath.c_str(), sizeof server_addr.sun_path);
 
     sock = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sock < 0) { std::perror("gym::Environment::socket"); std::exit(1); }
 
-    #ifdef __APPLE__
+#ifdef __APPLE__
     const auto addr_len = SUN_LEN(&server_addr);
-    #else
+#else
     const auto addr_len = std::strlen(server_addr.sun_path) + sizeof server_addr.sun_family;
-    #endif
+#endif
     const auto conn = connect(sock, (struct sockaddr *)&server_addr, addr_len);
     if (conn < 0) { std::perror("gym::Environment::connect"); std::exit(1); }
 }

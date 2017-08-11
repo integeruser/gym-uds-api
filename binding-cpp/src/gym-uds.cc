@@ -21,7 +21,7 @@ T Environment::recv_message()
     char buf[1024];
 
     auto nread = read(sock, buf, 4);
-    const int message_pb_len = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
+    const int message_pb_len = (buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0];
 
     nread = read(sock, buf, message_pb_len);
     std::string message_pb(buf, nread);

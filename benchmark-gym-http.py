@@ -1,30 +1,30 @@
 #!/usr/bin/env python3
+import argparse
 import timeit
 
 import gym_http_client  # https://github.com/openai/gym-http-api
 
-MAX_NUM_STEPS = 1
 
-client = gym_http_client.Client('http://127.0.0.1:5000')
-instance_id = client.env_create('Pong-v0')
+class HttpEnvironment:
+    def __init__(self, env_id):
+        self.client = gym_http_client.Client('http://127.0.0.1:5000')
+        self.instance_id = self.client.env_create(env_id)
 
-start = timeit.default_timer()
+    def reset(self):
+        return self.client.env_reset(self.instance_id)
 
-num_steps = 0
-benchmark_is_over = False
-while not benchmark_is_over:
-    client.env_reset(instance_id)
+    def sample(self):
+        return self.client.env_action_space_sample(self.instance_id)
 
-    done = False
-    while not done:
-        action = client.env_action_space_sample(instance_id)
-        o, _, done, _ = client.env_step(instance_id, action)
-        print(o)
+    def step(self, action):
+        return self.client.env_step(self.instance_id, action)
 
-        num_steps += 1
-        if num_steps == MAX_NUM_STEPS:
-            benchmark_is_over = True
-            break
 
-end = timeit.default_timer()
-print('%d steps in %f seconds' % (num_steps, end - start))
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('env_id')
+    args = parser.parse_args()
+
+    env = HttpEnvironment(args.env_id)
+    benchmark_gym_uds = __import__('benchmark-gym-uds')
+    benchmark_gym_uds.benchmark(env)

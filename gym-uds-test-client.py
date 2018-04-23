@@ -1,40 +1,32 @@
 #!/usr/bin/env python3
 import argparse
-import socket
 
+import grpc
+import gym_uds_pb2
+import gym_uds_pb2_grpc
 import numpy as np
 
-import gym_uds_pb2
-import utils
 
-
-class Environment:
+class EnvironmentClient:
     def __init__(self, sock_filepath):
-        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        self.sock.connect(sock_filepath)
+        channel = grpc.insecure_channel(sock_filepath)
+        self.stub = gym_uds_pb2_grpc.EnvironmentStub(channel)
         self.action_space = lambda: None
         self.action_space.sample = self.sample
 
     def reset(self):
-        utils.send_message(self.sock, gym_uds_pb2.Request(type=gym_uds_pb2.Request.RESET))
-        state_pb = utils.recv_message(self.sock, gym_uds_pb2.State)
+        state_pb = self.stub.Reset(gym_uds_pb2.Empty())
         observation = np.asarray(state_pb.observation.data).reshape(state_pb.observation.shape)
         return observation
 
     def step(self, action):
-        utils.send_message(self.sock, gym_uds_pb2.Request(type=gym_uds_pb2.Request.STEP))
-        utils.send_message(self.sock, gym_uds_pb2.Action(value=action))
-        state_pb = utils.recv_message(self.sock, gym_uds_pb2.State)
+        state_pb = self.stub.Step(gym_uds_pb2.Action(value=action))
         observation = np.asarray(state_pb.observation.data).reshape(state_pb.observation.shape)
         return observation, state_pb.reward, state_pb.done
 
     def sample(self):
-        utils.send_message(self.sock, gym_uds_pb2.Request(type=gym_uds_pb2.Request.SAMPLE))
-        action_pb = utils.recv_message(self.sock, gym_uds_pb2.Action)
+        action_pb = self.stub.Sample(gym_uds_pb2.Empty())
         return action_pb.value
-
-    def done(self):
-        utils.send_message(self.sock, gym_uds_pb2.Request(type=gym_uds_pb2.Request.DONE))
 
 
 if __name__ == '__main__':
@@ -42,11 +34,11 @@ if __name__ == '__main__':
     parser.add_argument(
         'filepath',
         nargs='?',
-        default='/tmp/gym-uds-socket',
-        help='a unique filepath where the socket will connect')
+        default='unix:///tmp/gym-uds-socket',
+        help='a unique filepath where the client will connect')
     args = parser.parse_args()
 
-    env = Environment(args.filepath)
+    env = EnvironmentClient(args.filepath)
 
     num_episodes = 3
     for episode in range(1, num_episodes + 1):

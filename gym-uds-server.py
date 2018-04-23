@@ -1,47 +1,37 @@
 #!/usr/bin/env python3
 import argparse
 import os
-import socket
+import time
+from concurrent import futures
 
+import grpc
 import gym
+import gym_uds_pb2
+import gym_uds_pb2_grpc
 import numpy as np
 
-import gym_uds_pb2
-import utils
+_ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 
-class Environment:
-    def __init__(self, env_id, sock):
+class Environment(gym_uds_pb2_grpc.EnvironmentServicer):
+    def __init__(self, env_id):
         self.env = gym.make(env_id)
-        self.sock = sock
-        self.sock.settimeout(1)
 
-    def run(self):
-        while True:
-            request = utils.recv_message(self.sock, gym_uds_pb2.Request)
-            if request.type == gym_uds_pb2.Request.DONE: break
-            elif request.type == gym_uds_pb2.Request.RESET: self.reset()
-            elif request.type == gym_uds_pb2.Request.STEP: self.step()
-            elif request.type == gym_uds_pb2.Request.SAMPLE: self.sample()
-
-    def reset(self):
+    def Reset(self, empty_request, context):
         observation = self.env.reset()
         observation_pb = gym_uds_pb2.Observation(data=observation.ravel(), shape=observation.shape)
-        utils.send_message(self.sock,
-                           gym_uds_pb2.State(observation=observation_pb, reward=0.0, done=False))
+        return gym_uds_pb2.State(observation=observation_pb, reward=0.0, done=False)
 
-    def step(self):
-        action = utils.recv_message(self.sock, gym_uds_pb2.Action)
-        observation, reward, done, _ = self.env.step(action.value)
+    def Step(self, action_request, context):
+        observation, reward, done, _ = self.env.step(action_request.value)
         assert type(observation) is np.ndarray
 
         observation_pb = gym_uds_pb2.Observation(data=observation.ravel(), shape=observation.shape)
-        utils.send_message(self.sock,
-                           gym_uds_pb2.State(observation=observation_pb, reward=reward, done=done))
+        return gym_uds_pb2.State(observation=observation_pb, reward=reward, done=done)
 
-    def sample(self):
+    def Sample(self, empty_request, context):
         action = self.env.action_space.sample()
-        utils.send_message(self.sock, gym_uds_pb2.Action(value=action))
+        return gym_uds_pb2.Action(value=action)
 
 
 if __name__ == '__main__':
@@ -50,8 +40,8 @@ if __name__ == '__main__':
     parser.add_argument(
         'filepath',
         nargs='?',
-        default='/tmp/gym-uds-socket',
-        help='a unique filepath where the socket will bind')
+        default='unix:///tmp/gym-uds-socket',
+        help='a unique filepath where the server will bind')
     args = parser.parse_args()
 
     try:
@@ -59,22 +49,12 @@ if __name__ == '__main__':
     except FileNotFoundError:
         pass
 
-    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    sock.bind(args.filepath)
-    sock.listen()
-
-    while True:
-        try:
-            conn, _ = sock.accept()
-            env = Environment(args.id, conn)
-            env.run()
-        except BrokenPipeError:
-            pass
-        except socket.timeout:
-            print('socket.timeout!')
-            pass
-        finally:
-            try:
-                del env
-            except NameError:
-                pass
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
+    gym_uds_pb2_grpc.add_EnvironmentServicer_to_server(Environment(args.id), server)
+    server.add_insecure_port(args.filepath)
+    server.start()
+    try:
+        while True:
+            time.sleep(_ONE_DAY_IN_SECONDS)
+    except KeyboardInterrupt:
+        server.stop(0)

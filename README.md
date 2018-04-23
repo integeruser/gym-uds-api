@@ -4,27 +4,23 @@ This project provides a local [Unix domain socket](https://en.wikipedia.org/wiki
 The API comes with a C++ binding example which supports one-dimensional observation spaces of type `Box` and action spaces of type `Discrete`.
 
 ## Requisites
-The code requires the `gym` package for Python 3 and any recent version of Google's [Protocol Buffers](https://developers.google.com/protocol-buffers/).
+The code requires the `gym` package for Python 3 and any recent version of [gRPC](https://grpc.io/).
 
 ## Installation
 1. Clone or download this repository
-2. Run `./build.sh` to generate the necessary protobuf headers and sources
+2. Run `./build.sh` to generate the necessary gRPC headers and sources
 
 ## Usage
 1. Start the server:
 ```
 /o/gym-uds-api $ python3 ./gym-uds-server.py CartPole-v0
 ```
-2. Run the (useless, for testing only) Python client or the C++ binding:
+2. Run the (useless, for testing only) Python client or the C++ client:
 ```
-/o/gym-uds-api $ ./gym-uds-test-client.py
+/o/gym-uds-api $ python3 ./gym-uds-test-client.py
 Ep. 1: 15.00
 Ep. 2: 12.00
 Ep. 3: 20.00
-/o/gym-uds-api $ ./gym-uds-test-client.py
-Ep. 1: 14.00
-Ep. 2: 14.00
-Ep. 3: 16.00
 ```
 ```
 /o/g/binding-cpp $ make

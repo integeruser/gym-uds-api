@@ -5,6 +5,11 @@
 #include <tuple>
 #include <vector>
 
+#include <grpcpp/grpcpp.h>
+
+#include "gym-uds.pb.h"
+#include "gym-uds.grpc.pb.h"
+
 namespace gym_uds
 {
 using action_t = int;
@@ -12,19 +17,13 @@ using observation_t = std::vector<float>;
 using state_t = std::tuple<observation_t, float, bool>;
 
 
-class Environment
+class EnvironmentClient
 {
     private:
-        int sock;
-
-        template<typename T>
-        T recv_message();
-
-        template<typename T>
-        void send_message(const T&);
+        std::unique_ptr<Environment::Stub> stub;
 
     public:
-        Environment(const std::string&);
+        EnvironmentClient(const std::string&);
 
         observation_t reset();
         state_t step(const action_t&);
@@ -32,6 +31,5 @@ class Environment
         action_t sample();
 };
 }
-
 
 #endif

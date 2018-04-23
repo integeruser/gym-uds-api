@@ -1,123 +1,55 @@
 #include <algorithm>
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <iostream>
+#include <cassert>
 #include <string>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <unistd.h>
-#include <vector>
 
 #include "gym-uds.h"
-#include "gym-uds.pb.h"
 
 
 namespace gym_uds
 {
-void recv_exactly(int socket, unsigned int n, char *buf)
+EnvironmentClient::EnvironmentClient(const std::string& sock_filepath) :
+    stub{Environment::NewStub(grpc::CreateChannel(sock_filepath, grpc::InsecureChannelCredentials()))}
+{}
+
+
+observation_t EnvironmentClient::reset()
 {
-    auto remaining = n;
-    while (remaining > 0) {
-        const auto nread = read(socket, buf + (n-remaining), remaining);
-        if (nread < 1 ) { std::perror("recv_exactly"); std::exit(1); }
-        remaining -= nread;
-    }
-}
+    grpc::ClientContext context;
+    Empty empty_request;
+    State state_reply;
 
-template<typename T>
-T Environment::recv_message()
-{
-    char buf[1024];
+    grpc::Status status = stub->Reset(&context, empty_request, &state_reply);
+    assert(status.ok());
 
-    auto nread = read(sock, buf, 4);
-    const int message_pb_len = (buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0];
-
-    std::vector<char> buf2(message_pb_len);
-    recv_exactly(sock, message_pb_len, buf2.data());
-    std::string message_pb(buf2.data(), message_pb_len);
-
-    T message;
-    if (!message.ParseFromString(message_pb)) {
-        std::cerr << "Failed to parse message." << std::endl;
-        std::exit(1);
-    }
-    return message;
-}
-
-template<typename T>
-void Environment::send_message(const T& message)
-{
-    std::string message_pb;
-    if (!message.SerializeToString(&message_pb)) {
-        std::cerr << "Failed to write message." << std::endl;
-        std::exit(1);
-    }
-
-    const int message_pb_len = message_pb.size();
-    auto nwrite = write(sock, (char *)&message_pb_len, 4);
-    nwrite = write(sock, message_pb.c_str(), message_pb.size());
-}
-
-
-Environment::Environment(const std::string& sock_filepath)
-{
-    struct sockaddr_un server_addr = {};
-#ifdef __APPLE__
-    server_addr.sun_len = sizeof server_addr;
-#endif
-    server_addr.sun_family = AF_UNIX;
-    std::strncpy(server_addr.sun_path, sock_filepath.c_str(), sizeof server_addr.sun_path);
-
-    sock = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (sock < 0) { std::perror("gym::Environment::socket"); std::exit(1); }
-
-#ifdef __APPLE__
-    const auto addr_len = SUN_LEN(&server_addr);
-#else
-    const auto addr_len = std::strlen(server_addr.sun_path) + sizeof server_addr.sun_family;
-#endif
-    const auto conn = connect(sock, (struct sockaddr *)&server_addr, addr_len);
-    if (conn < 0) { std::perror("gym::Environment::connect"); std::exit(1); }
-}
-
-
-observation_t Environment::reset()
-{
-    Request request;
-    request.set_type(Request::RESET);
-    send_message<Request>(request);
-
-    State state = recv_message<State>();
     observation_t observation;
-    std::copy_n(state.observation().data().cbegin(), state.observation().data().size(), std::back_inserter(observation));
+    std::copy_n(state_reply.observation().data().cbegin(), state_reply.observation().data().size(), std::back_inserter(observation));
     return observation;
 }
 
-state_t Environment::step(const action_t& action_value)
+state_t EnvironmentClient::step(const action_t& action_value)
 {
-    Request request;
-    request.set_type(Request::STEP);
-    send_message<Request>(request);
+    grpc::ClientContext context;
+    Action action_request;
+    action_request.set_value(action_value);
+    State state_reply;
 
-    Action action;
-    action.set_value(action_value);
-    send_message<Action>(action);
+    grpc::Status status = stub->Step(&context, action_request, &state_reply);
+    assert(status.ok());
 
-    State state = recv_message<State>();
     observation_t observation;
-    std::copy_n(state.observation().data().cbegin(), state.observation().data().size(), std::back_inserter(observation));
-    return {observation, state.reward(), state.done()};
+    std::copy_n(state_reply.observation().data().cbegin(), state_reply.observation().data().size(), std::back_inserter(observation));
+    return {observation, state_reply.reward(), state_reply.done()};
 }
 
 
-action_t Environment::sample()
+action_t EnvironmentClient::sample()
 {
-    Request request;
-    request.set_type(Request::SAMPLE);
-    send_message<Request>(request);
+    grpc::ClientContext context;
+    Empty empty_request;
+    Action action_reply;
 
-    Action action = recv_message<Action>();
-    return action.value();
+    grpc::Status status = stub->Sample(&context, empty_request, &action_reply);
+    assert(status.ok());
+    return action_reply.value();
 }
 }

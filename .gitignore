@@ -5,5 +5,6 @@ binding-cpp/include/gym-uds.grpc.pb.h
 binding-cpp/src/gym-uds.pb.cc
 binding-cpp/src/gym-uds.grpc.pb.cc
 gym_http_client.py
+gym_http_server.py
 gym_uds_pb2.py
 gym_uds_pb2_grpc.py

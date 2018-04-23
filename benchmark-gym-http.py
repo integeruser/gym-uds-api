@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import argparse
-import timeit
 
 import gym_http_client  # https://github.com/openai/gym-http-api
 

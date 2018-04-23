@@ -26,7 +26,7 @@ def benchmark(env, MAX_NUM_STEPS=1):
 
 class UdsEnvironment:
     def __init__(self, sock_filepath):
-        self.env = __import__('gym-uds-test-client').Environment(sock_filepath)
+        self.env = __import__('gym-uds-test-client').EnvironmentClient(sock_filepath)
 
     def reset(self):
         return self.env.reset()
@@ -39,5 +39,5 @@ class UdsEnvironment:
 
 
 if __name__ == '__main__':
-    env = UdsEnvironment('/Users/fcagnin/volatile/gym-uds-socket')
+    env = UdsEnvironment('unix:///tmp/gym-uds-socket')
     benchmark(env)

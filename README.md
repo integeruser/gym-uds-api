@@ -1,5 +1,5 @@
 # gym-uds-api
-This project provides a local [Unix domain socket](https://en.wikipedia.org/wiki/Unix_domain_socket) API to the [OpenAI Gym](https://github.com/openai/gym) toolkit, allowing development in languages other than Python with a faster interprocess communication than the [gym-http-api](https://github.com/openai/gym-http-api).
+This project provides a local [Unix domain socket](https://en.wikipedia.org/wiki/Unix_domain_socket) API to the [OpenAI Gym](https://github.com/openai/gym) toolkit, allowing development in languages other than Python with a faster inter-process communication than the [gym-http-api](https://github.com/openai/gym-http-api).
 
 The API comes with a C++ binding example which supports one-dimensional observation spaces of type `Box` and action spaces of type `Discrete`.
 

@@ -4,7 +4,7 @@ This project provides a local [Unix domain socket](https://en.wikipedia.org/wiki
 The API comes with a C++ binding example which supports one-dimensional observation spaces of type `Box` and action spaces of type `Discrete`.
 
 ## Requisites
-The code requires the `gym` package for Python 3 and any recent version of [gRPC](https://grpc.io/).
+The code requires the `gym` package for Python 3 and any recent version of [gRPC](https://grpc.io/) for both C++ (e.g. `brew install grpc` on macOS with Homebrew) and Python (e.g. `pip3 install grpcio grpcio-tools`). (On macOS with Homebrew, the `realpath` utility used in `./build.sh` can be installed with `brew install coreutils`.)
 
 ## Installation
 1. Clone or download this repository

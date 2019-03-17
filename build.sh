@@ -10,7 +10,7 @@ fi
 GRPC_CPP_PLUGIN_PATH=$(which grpc_cpp_plugin)
 
 if [[ ! -z $PROTOC ]] ; then
-    python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. gym-uds.proto &&
+    python3 -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. gym-uds.proto &&
     $PROTOC --python_out=. gym-uds.proto &&
     $PROTOC --cpp_out=. gym-uds.proto &&
     $PROTOC --grpc_out=. --plugin=protoc-gen-grpc=$GRPC_CPP_PLUGIN_PATH gym-uds.proto &&

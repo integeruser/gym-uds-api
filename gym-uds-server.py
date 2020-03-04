@@ -1,19 +1,18 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import argparse
 import os
 import time
 from concurrent import futures
 
-import grpc
 import gym
-import gym_uds_pb2
-import gym_uds_pb2_grpc
 import numpy as np
 
-_ONE_DAY_IN_SECONDS = 60 * 60 * 24
+import grpc
+import gym_uds_pb2
+import gym_uds_pb2_grpc
 
 
-class Environment(gym_uds_pb2_grpc.EnvironmentServicer):
+class EnvironmentServicer(gym_uds_pb2_grpc.EnvironmentServicer):
     def __init__(self, env_id):
         self.env = gym.make(env_id)
 
@@ -24,8 +23,6 @@ class Environment(gym_uds_pb2_grpc.EnvironmentServicer):
 
     def Step(self, action_request, context):
         observation, reward, done, _ = self.env.step(action_request.value)
-        assert type(observation) is np.ndarray
-
         observation_pb = gym_uds_pb2.Observation(data=observation.ravel(), shape=observation.shape)
         return gym_uds_pb2.State(observation=observation_pb, reward=reward, done=done)
 
@@ -34,27 +31,24 @@ class Environment(gym_uds_pb2_grpc.EnvironmentServicer):
         return gym_uds_pb2.Action(value=action)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('id', help='the id of the gym environment to simulate')
+    parser.add_argument("id", help="the id of the gym environment to simulate")
     parser.add_argument(
-        'filepath',
-        nargs='?',
-        default='unix:///tmp/gym-uds-socket',
-        help='a unique filepath where the server will bind')
+        "sockfilepath",
+        nargs="?",
+        default="unix:///tmp/gym-uds-socket",
+        help="a unique filepath where the Unix domain server will bind",
+    )
     args = parser.parse_args()
 
     try:
-        os.remove(args.filepath)
+        os.remove(args.sockfilepath)
     except FileNotFoundError:
         pass
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
-    gym_uds_pb2_grpc.add_EnvironmentServicer_to_server(Environment(args.id), server)
-    server.add_insecure_port(args.filepath)
+    gym_uds_pb2_grpc.add_EnvironmentServicer_to_server(EnvironmentServicer(args.id), server)
+    server.add_insecure_port(args.sockfilepath)
     server.start()
-    try:
-        while True:
-            time.sleep(_ONE_DAY_IN_SECONDS)
-    except KeyboardInterrupt:
-        server.stop(0)
+    server.wait_for_termination()

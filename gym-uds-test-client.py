@@ -1,15 +1,16 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import argparse
+
+import numpy as np
 
 import grpc
 import gym_uds_pb2
 import gym_uds_pb2_grpc
-import numpy as np
 
 
 class EnvironmentClient:
-    def __init__(self, sock_filepath):
-        channel = grpc.insecure_channel(sock_filepath)
+    def __init__(self, sockfilepath):
+        channel = grpc.insecure_channel(sockfilepath)
         self.stub = gym_uds_pb2_grpc.EnvironmentStub(channel)
         self.action_space = lambda: None
         self.action_space.sample = self.sample
@@ -29,16 +30,17 @@ class EnvironmentClient:
         return action_pb.value
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        'filepath',
-        nargs='?',
-        default='unix:///tmp/gym-uds-socket',
-        help='a unique filepath where the client will connect')
+        "sockfilepath",
+        nargs="?",
+        default="unix:///tmp/gym-uds-socket",
+        help="a unique filepath where the Unix domain client will connect",
+    )
     args = parser.parse_args()
 
-    env = EnvironmentClient(args.filepath)
+    env = EnvironmentClient(args.sockfilepath)
 
     num_episodes = 3
     for episode in range(1, num_episodes + 1):
@@ -50,4 +52,4 @@ if __name__ == '__main__':
             action = env.action_space.sample()
             observation, reward, done = env.step(action)
             episode_reward += reward
-        print('Ep. %d: %.2f' % (episode, episode_reward))
+        print("Ep. {}: {:.2f}".format(episode, episode_reward))

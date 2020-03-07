@@ -1,35 +1,24 @@
-#ifndef GYM_H
-#define GYM_H
+#ifndef GYM_UDS_H
+#define GYM_UDS_H
 
+#include <memory>
 #include <string>
-#include <tuple>
-#include <vector>
-
-#include <grpcpp/grpcpp.h>
 
 #include "gym-uds.pb.h"
 #include "gym-uds.grpc.pb.h"
 
-namespace gym_uds
-{
-using action_t = int;
-using observation_t = std::vector<float>;
-using state_t = std::tuple<observation_t, float, bool>;
-
-
 class EnvironmentClient
 {
-    private:
-        std::unique_ptr<Environment::Stub> stub;
+private:
+    std::unique_ptr<Environment::Stub> stub;
 
-    public:
-        EnvironmentClient(const std::string&);
+public:
+    EnvironmentClient(const std::string &);
 
-        observation_t reset();
-        state_t step(const action_t&);
+    void reset(State *state);
+    void step(const Action &action, State *state);
 
-        action_t sample();
+    void sample(Action *action);
 };
-}
 
-#endif
+#endif // GYM_UDS_H

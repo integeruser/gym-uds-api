@@ -1,28 +1,33 @@
+#include <cstdlib>
 #include <iostream>
 
 #include "gym-uds.h"
 #include "gym-uds.pb.h"
+#include "gym-uds.grpc.pb.h"
 
-
-int main(int argc, char const* argv[])
+int main(int argc, char const *argv[])
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-    auto env = gym_uds::EnvironmentClient("unix:///tmp/gym-uds-socket");
+    auto env = EnvironmentClient("unix:///tmp/gym-uds-socket");
 
     const int num_episodes = 3;
-    for (int episode = 1; episode <= num_episodes; ++episode) {
-        gym_uds::observation_t observation = env.reset();
+    for (int episode = 1; episode <= num_episodes; ++episode)
+    {
+        State state;
+        env.reset(&state);
 
-        float reward, episode_reward = 0.0f;
-        bool done = false;
-        while (!done) {
-            gym_uds::action_t action = env.sample();
-            std::tie(observation, reward, done) = env.step(action);
-            episode_reward += reward;
+        float episode_reward = 0.0f;
+        while (!state.done())
+        {
+            Action action;
+            env.sample(&action);
+
+            env.step(action, &state);
+            episode_reward += state.reward();
         }
         std::cout << "Ep. " << episode << ": " << episode_reward << std::endl;
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }

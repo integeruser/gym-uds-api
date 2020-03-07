@@ -1,7 +1,7 @@
 # gym-uds-api
 This project presents a basic API for interacting with [OpenAI Gym](https://github.com/openai/gym) environments in languages other than Python through the [gRPC](https://grpc.io) framework and local Unix domain sockets.
 
-The API comes with a C++ binding example which supports one-dimensional observation spaces of type `Box` and action spaces of type `Discrete` (suitable, for example, for the CartPole-v0 environment).
+The API comes with example C++ bindings supporting one-dimensional observation spaces of type `Box` and action spaces of type `Discrete` (suitable, for instance, for the CartPole-v0 environment).
 
 ## Requisites
 Example instructions are provided for macOS (tested on macOS Catalina 10.15.3).
@@ -24,6 +24,21 @@ Example instructions are provided for macOS (tested on macOS Catalina 10.15.3).
 
         ~$ pip install grpcio_tools numpy gym
 
+Tested with:
+```
+~$ brew list --versions pkg-config protobuf grpc
+grpc 1.27.3
+pkg-config 0.29.2
+protobuf 3.11.4
+```
+```
+~$ pip list | egrep "grpcio|numpy|gym"
+grpcio       1.27.2
+grpcio-tools 1.27.2
+gym          0.17.0
+numpy        1.18.1
+```
+
 ## Installation
 1. Clone this repository:
 
@@ -33,7 +48,7 @@ Example instructions are provided for macOS (tested on macOS Catalina 10.15.3).
 
         gym-uds-api$ python -m grpc_tools.protoc -I=. --python_out=. --grpc_python_out=. ./gym-uds.proto
 
-1. To build the C++ example client, generate the gRPC headers and sources for C++ and move them to the `binding-cpp` directory:
+1. To build the C++ client, generate the gRPC headers and sources for C++ and move them to the `binding-cpp` directory:
 
         gym-uds-api$ protoc -I=. --cpp_out=. --grpc_out=. --plugin=protoc-gen-grpc=$(which grpc_cpp_plugin) ./gym-uds.proto
         gym-uds-api$ mv ./gym-uds.pb.h binding-cpp/include/
